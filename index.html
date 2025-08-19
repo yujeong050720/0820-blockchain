@@ -3,27 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <title>Login Page</title>
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
   <h2>사용자 로그인</h2>
   <form id="loginForm">
     <label>닉네임: <input type="text" id="nickname" required></label><br><br>
     <label>지갑 주소: <input type="text" id="wallet" required></label><br><br>
-    <label>링크 입력: <input type="text" id="userLink" placeholder="https://example.com"></label><br><br>
     <button type="submit">Send</button>
   </form>
 
   <script>
+    const socket = io(); // socket 연결
+
     const form = document.getElementById('loginForm');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const nickname = document.getElementById('nickname').value.trim();
       const wallet = document.getElementById('wallet').value.trim();
-      const userLink = document.getElementById('userLink').value.trim();
 
-      // html2.html로 이동 + query string으로 전달
-      const query = `nickname=${encodeURIComponent(nickname)}&wallet=${encodeURIComponent(wallet)}&link=${encodeURIComponent(userLink)}`;
-      window.location.href = `html2.html?${query}`;
+      // 서버에 전송: 닉네임 + 지갑주소 ↔ socket.id 매핑
+      socket.emit("registerUser", { nickname, wallet });
+    });
+
+    // 서버에서 등록 완료 응답 받기
+    socket.on("registered", (msg) => {
+      console.log("✅ 서버 응답:", msg);
+      alert(msg); // 확인창으로 띄워줌
+      // 이후 채팅방 페이지로 이동도 가능
+      window.location.href = "html2.html";
     });
   </script>
 </body>
